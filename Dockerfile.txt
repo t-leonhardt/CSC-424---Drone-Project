@@ -1,0 +1,28 @@
+FROM ubuntu:20.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cat 'source ~/catkin_ws/devel/setup.bash
+source /home/tkoti/ardupilot/Tools/completion/completion.bash
+source /usr/share/gazebo/setup.sh
+export GAZEBO_MODEL_PATH=~/ardupilot_gazebo/models 
+GAZEBO_MODEL_PATH=/home/tkoti/ardupilot_gazebo/models:/home/tkoti/catkin_ws/src/iq_sim/models
+source ~/catkin_ws/devel/setup.bash' > ~/.bashrc
+
+# Copy application code
+COPY app/ /opt/myapp/
+WORKDIR /opt/myapp/
+
+RUN catkin build
+
+RUN ./start_software.sh
+
